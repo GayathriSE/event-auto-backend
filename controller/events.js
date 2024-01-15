@@ -1,9 +1,8 @@
 import { google } from "googleapis";
 import { environment } from "../utils/environments.js";
-import { credentials } from "../utils/credentials.js";
 import { makeApiRequest, updateOrCreateContact } from "../utils/utils.js";
-const { calendarId, hubspotApiKey } = environment;
-const { client_id, client_secret, redirect_uris } = credentials.installed;
+const { calendarId, hubspotApiKey, clientId, clientSecret, redirectUri } =
+  environment;
 
 const scope = [
   "https://www.googleapis.com/auth/calendar",
@@ -12,9 +11,9 @@ const scope = [
 ];
 
 const oauth2Client = new google.auth.OAuth2(
-  client_id,
-  client_secret,
-  redirect_uris
+  clientId,
+  clientSecret,
+  redirectUri
 );
 
 const authorizeUrl = oauth2Client.generateAuthUrl({
@@ -71,7 +70,7 @@ export const createCalendarEvent = async (req, res, next) => {
       calendarId,
       resource: event,
     });
-    res.status(200).json({
+    return res.status(200).json({
       message: "Event created successfully",
       statusCode: 200,
       eventId: createdEvent.data,
@@ -127,7 +126,11 @@ export const addParticipants = async (req, res, next) => {
           updateOrCreateContact(payload, hubspotApiKey, next);
         }
       }
-      res.status(200).json({ message: "Event updated successfully", update });
+      return res.status(200).json({
+        message: "Event updated successfully",
+        statusCode: 200,
+        update,
+      });
     }
   } catch (error) {
     console.log(error);
